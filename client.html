@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BONG$ Live Market - Synced</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+
+<div id="bong-live-market">
+
+  <div class="blm-header">
+    <div>
+      <div class="blm-kicker">BONGIORNOTES • LIVE MARKET SIMULATION</div>
+      <h1>BONG$</h1>
+      <p>Finite geometry → live mathematical market field</p>
+    </div>
+
+    <div class="blm-status">
+      <span class="blm-dot" id="statusDot"></span>
+      <span id="statusText">CONNECTING...</span>
+    </div>
+  </div>
+
+  <div class="blm-price-card">
+
+    <div class="blm-label">BONG$ / USD</div>
+
+    <div class="blm-price" id="blmPrice">
+      $4.20
+    </div>
+
+    <div class="blm-change" id="blmChange">
+      ▲ 0.00%
+    </div>
+
+    <div class="blm-range">
+      <span>$4.00</span>
+
+      <div class="blm-track">
+        <div class="blm-fill" id="blmFill"></div>
+        <div class="blm-marker" id="blmMarker"></div>
+      </div>
+
+      <span>$6.00</span>
+    </div>
+
+    <div class="blm-reference">
+      REFERENCE VALUE
+      <strong>$4.20</strong>
+    </div>
+
+  </div>
+
+
+  <div class="blm-field">
+
+    <canvas id="blmCanvas"></canvas>
+
+    <div class="blm-field-info">
+      <strong>FINITE GEOMETRIC MARKET</strong>
+      <span id="blmGeometry">
+        L1 FIELD • ♦
+      </span>
+    </div>
+
+    <div class="blm-live-node">
+      <span>LIVE NODE VALUE</span>
+      <strong id="blmNodeValue">$4.20</strong>
+    </div>
+
+  </div>
+
+
+  <div class="blm-stats">
+
+    <div>
+      <span>LOW</span>
+      <strong>$4.00</strong>
+    </div>
+
+    <div>
+      <span>REFERENCE</span>
+      <strong>$4.20</strong>
+    </div>
+
+    <div>
+      <span>HIGH</span>
+      <strong>$6.00</strong>
+    </div>
+
+    <div>
+      <span>SUPPLY</span>
+      <strong>10B BONG</strong>
+    </div>
+
+  </div>
+
+
+  <div class="blm-explanation">
+
+    <strong>BONG$ GEOMETRIC MARKET</strong>
+
+    <p>
+      This is a real-time synchronized simulation. Live price is streamed
+      from the server via WebSocket and displayed across all connected clients.
+    </p>
+
+    <code>
+      BONG$ = 4.20 + geometric field variation (SERVER-SYNCED)
+    </code>
+
+  </div>
+
+</div>
+
+
+<style>
+
+#bong-live-market {
+
+  width:100%;
+  max-width:1100px;
+  margin:30px auto;
+
+  color:#f5f7fa;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+}
+
+#bong-live-market * {
+  box-sizing:border-box;
+}
+
+
+.blm-header {
+
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+
+  margin-bottom:14px;
+
+}
+
+
+.blm-kicker {
+
+  color:#60a5fa;
+
+  font-size:10px;
+
+  letter-spacing:2px;
+
+  font-weight:800;
+
+  margin-bottom:4px;
+
+}
+
+
+.blm-header h1 {
+
+  margin:0;
+
+  font-size:34px;
+
+  letter-spacing:-1px;
+
+  color:#fff;
+
+}
+
+
+.blm-header p {
+
+  margin:5px 0 0;
+
+  color:#8995a5;
+
+  font-size:13px;
+
+}
+
+
+.blm-status {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:7px;
+
+  padding:8px 11px;
+
+  border:1px solid #303846;
+
+  border-radius:8px;
+
+  background:#10151d;
+
+  color:#9aa6b6;
+
+  font-family:monospace;
+
+  font-size:9px;
+
+}
+
+
+.blm-dot {
+
+  width:7px;
+  height:7px;
+
+  border-radius:50%;
+
+  background:#888;
+
+  box-shadow:
+    0 0 10px #888;
+
+  animation:
+    blmPulse 1.4s infinite;
+
+}
+
+.blm-dot.connected {
+  background:#34d399;
+  box-shadow: 0 0 10px #34d399;
+}
+
+.blm-dot.disconnected {
+  background:#fb7185;
+  box-shadow: 0 0 10px #fb7185;
+}
+
+
+@keyframes blmPulse {
+
+  0%,100% {
+    opacity:1;
+  }
+
+  50% {
+    opacity:.35;
+  }
+
+}
+
+
+.blm-price-card {
+
+  padding:24px;
+
+  border:1px solid #303846;
+
+  border-radius:14px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(96,165,250,.08),
+      transparent 60%
+    ),
+    #0d1219;
+
+  text-align:center;
+
+}
+
+
+.blm-label {
+
+  color:#7f8b9b;
+
+  font-family:monospace;
+
+  font-size:10px;
+
+  letter-spacing:1.5px;
+
+}
+
+
+.blm-price {
+
+  margin-top:4px;
+
+  font-family:monospace;
+
+  font-size:64px;
+
+  line-height:1;
+
+  font-weight:700;
+
+  letter-spacing:-3px;
+
+  color:#fff;
+
+  text-shadow:
+    0 0 30px rgba(96,165,250,.18);
+
+}
+
+
+.blm-change {
+
+  margin-top:9px;
+
+  color:#34d399;
+
+  font-family:monospace;
+
+  font-size:12px;
+
+}
+
+
+.blm-change.down {
+
+  color:#fb7185;
+
+}
+
+
+.blm-range {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  max-width:600px;
+
+  margin:22px auto 0;
+
+  color:#7f8b9b;
+
+  font-family:monospace;
+
+  font-size:10px;
+
+}
+
+
+.blm-track {
+
+  position:relative;
+
+  flex:1;
+
+  height:5px;
+
+  border-radius:5px;
+
+  background:#252e3b;
+
+}
+
+
+.blm-fill {
+
+  position:absolute;
+
+  left:0;
+
+  top:0;
+
+  height:100%;
+
+  width:10%;
+
+  border-radius:5px;
+
+  background:#60a5fa;
+
+}
+
+
+.blm-marker {
+
+  position:absolute;
+
+  top:50%;
+
+  left:10%;
+
+  width:13px;
+
+  height:13px;
+
+  transform:
+    translate(-50%,-50%);
+
+  border-radius:50%;
+
+  background:#fff;
+
+  box-shadow:
+    0 0 14px rgba(255,255,255,.5);
+
+}
+
+
+.blm-reference {
+
+  margin-top:17px;
+
+  color:#7f8b9b;
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+}
+
+
+.blm-reference strong {
+
+  margin-left:5px;
+
+  color:#60a5fa;
+
+  font-family:monospace;
+
+}
+
+
+.blm-field {
+
+  position:relative;
+
+  height:440px;
+
+  margin-top:12px;
+
+  overflow:hidden;
+
+  border:1px solid #303846;
+
+  border-radius:14px;
+
+  background:#070a0f;
+
+}
+
+
+#blmCanvas {
+
+  position:absolute;
+
+  inset:0;
+
+  width:100%;
+
+  height:100%;
+
+  display:block;
+
+}
+
+
+.blm-field-info {
+
+  position:absolute;
+
+  top:13px;
+
+  left:14px;
+
+  padding:9px 11px;
+
+  border:1px solid #303846;
+
+  border-radius:7px;
+
+  background:rgba(5,8,13,.85);
+
+  font-family:monospace;
+
+  pointer-events:none;
+
+}
+
+
+.blm-field-info strong {
+
+  display:block;
+
+  color:#fff;
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+}
+
+
+.blm-field-info span {
+
+  display:block;
+
+  margin-top:3px;
+
+  color:#60a5fa;
+
+  font-size:9px;
+
+}
+
+
+.blm-live-node {
+
+  position:absolute;
+
+  right:14px;
+
+  bottom:14px;
+
+  padding:10px 12px;
+
+  border:1px solid rgba(52,211,153,.25);
+
+  border-radius:8px;
+
+  background:rgba(5,8,13,.88);
+
+  font-family:monospace;
+
+}
+
+
+.blm-live-node span {
+
+  display:block;
+
+  color:#7f8b9b;
+
+  font-size:8px;
+
+  letter-spacing:1px;
+
+}
+
+
+.blm-live-node strong {
+
+  display:block;
+
+  margin-top:3px;
+
+  color:#34d399;
+
+  font-size:18px;
+
+}
+
+
+.blm-stats {
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  margin-top:12px;
+
+  border:1px solid #303846;
+
+  border-radius:10px;
+
+  overflow:hidden;
+
+  background:#10151d;
+
+}
+
+
+.blm-stats div {
+
+  padding:13px;
+
+  border-right:1px solid #303846;
+
+}
+
+
+.blm-stats div:last-child {
+
+  border-right:0;
+
+}
+
+
+.blm-stats span {
+
+  display:block;
+
+  color:#7f8b9b;
+
+  font-size:8px;
+
+  letter-spacing:1px;
+
+}
+
+
+.blm-stats strong {
+
+  display:block;
+
+  margin-top:5px;
+
+  color:#edf2f7;
+
+  font-family:monospace;
+
+  font-size:12px;
+
+}
+
+
+.blm-explanation {
+
+  margin-top:12px;
+
+  padding:15px;
+
+  border:1px solid #303846;
+
+  border-radius:10px;
+
+  background:#10151d;
+
+}
+
+
+.blm-explanation strong {
+
+  color:#60a5fa;
+
+  font-size:10px;
+
+  letter-spacing:1px;
+
+}
+
+
+.blm-explanation p {
+
+  color:#8995a5;
+
+  font-size:11px;
+
+  line-height:1.5;
+
+  margin:8px 0;
+
+}
+
+
+.blm-explanation code {
+
+  color:#cbd5e1;
+
+  font-family:monospace;
+
+  font-size:11px;
+
+}
+
+
+@media(max-width:650px) {
+
+  .blm-header {
+
+    display:block;
+
+  }
+
+  .blm-status {
+
+    margin-top:10px;
+
+    display:inline-flex;
+
+  }
+
+  .blm-price {
+
+    font-size:48px;
+
+  }
+
+  .blm-stats {
+
+    grid-template-columns:
+      1fr 1fr;
+
+  }
+
+  .blm-stats div:nth-child(2) {
+
+    border-right:0;
+
+  }
+
+  .blm-stats div:nth-child(-n+2) {
+
+    border-bottom:1px solid #303846;
+
+  }
+
+}
+
+</style>
+
+
+<script>
+
+(function() {
+
+  // ========================================================================
+  // SOCKET.IO CONNECTION
+  // ========================================================================
+
+  // Change this to your server URL
+  const SERVER_URL = "http://localhost:3000";
+  const socket = io(SERVER_URL);
+
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+
+  socket.on("connect", () => {
+    console.log("✓ Connected to server");
+    statusDot.classList.remove("disconnected");
+    statusDot.classList.add("connected");
+    statusText.textContent = "LIVE SIMULATION";
+  });
+
+  socket.on("disconnect", () => {
+    console.log("✗ Disconnected from server");
+    statusDot.classList.remove("connected");
+    statusDot.classList.add("disconnected");
+    statusText.textContent = "DISCONNECTED";
+  });
+
+  // ========================================================================
+  // DOM ELEMENTS
+  // ========================================================================
+
+  const priceEl =
+    document.getElementById("blmPrice");
+
+  const changeEl =
+    document.getElementById("blmChange");
+
+  const fillEl =
+    document.getElementById("blmFill");
+
+  const markerEl =
+    document.getElementById("blmMarker");
+
+  const nodeEl =
+    document.getElementById("blmNodeValue");
+
+  const canvas =
+    document.getElementById("blmCanvas");
+
+  const field =
+    canvas.parentElement;
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  const MIN = 4.00;
+  const MAX = 6.00;
+  const REFERENCE = 4.20;
+
+
+  let price = REFERENCE;
+  let previous = REFERENCE;
+
+
+  // ========================================================================
+  // PRICE UPDATE FROM SERVER
+  // ========================================================================
+
+  socket.on("price-update", (data) => {
+    price = data.price;
+    previous = data.previous;
+
+    updateDisplay(data.change);
+  });
+
+
+  function updateDisplay(change) {
+
+    priceEl.textContent =
+      "$" + price.toFixed(4);
+
+    if (change >= 0) {
+      changeEl.textContent =
+        "▲ " +
+        Math.abs(change).toFixed(3) +
+        "%";
+
+      changeEl.classList.remove("down");
+    } else {
+      changeEl.textContent =
+        "▼ " +
+        Math.abs(change).toFixed(3) +
+        "%";
+
+      changeEl.classList.add("down");
+    }
+
+    // $4 → 0%, $6 → 100%
+    const percentage =
+      ((price - MIN) / (MAX - MIN)) * 100;
+
+    fillEl.style.width = percentage + "%";
+    markerEl.style.left = percentage + "%";
+    nodeEl.textContent = "$" + price.toFixed(4);
+  }
+
+
+  // ========================================================================
+  // CANVAS VISUALIZATION
+  // ========================================================================
+
+  function resize() {
+    const rect = field.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    canvas.style.width = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+
+  function drawField() {
+    const w = field.clientWidth;
+    const h = field.clientHeight;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // FINITE SQUARE GRID
+    const grid = 28;
+    ctx.strokeStyle = "rgba(125,145,170,.11)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x < w; x += grid) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+    }
+
+    for (let y = 0; y < h; y += grid) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+    }
+
+    ctx.stroke();
+
+    // CENTER
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.strokeStyle = "rgba(96,165,250,.3)";
+    ctx.beginPath();
+    ctx.moveTo(cx, 0);
+    ctx.lineTo(cx, h);
+    ctx.moveTo(0, cy);
+    ctx.lineTo(w, cy);
+    ctx.stroke();
+
+    // PRICE CONTROLS THE GEOMETRIC RADIUS
+    const radius =
+      55 + ((price - MIN) / (MAX - MIN)) * 150;
+
+    // DIAMOND
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - radius);
+    ctx.lineTo(cx + radius, cy);
+    ctx.lineTo(cx, cy + radius);
+    ctx.lineTo(cx - radius, cy);
+    ctx.closePath();
+
+    ctx.strokeStyle = "rgba(96,165,250,.9)";
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "rgba(96,165,250,.5)";
+    ctx.stroke();
+
+    // CIRCLE
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.707, 0, Math.PI * 2);
+
+    ctx.strokeStyle = "rgba(52,211,153,.8)";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(52,211,153,.45)";
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+
+    // CENTER NODE
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    // PRICE LABEL
+    ctx.font = "bold 11px monospace";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,.8)";
+    ctx.fillText(
+      "$" + price.toFixed(4),
+      cx,
+      cy + radius + 25
+    );
+
+    requestAnimationFrame(drawField);
+  }
+
+  drawField();
+
+})();
+
+</script>
+
+</body>
+</html>
